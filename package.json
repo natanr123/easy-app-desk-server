@@ -1,0 +1,30 @@
+{
+  "name": "easy-app-desc-server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "babel-plugin-transform-es2015-modules-commonjs": "*",
+    "babel-plugin-transform-runtime": "*",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "*",
+    "babel-preset-es2015": "*",
+    "babel-preset-es2015-node6": "*",
+    "babel-preset-es2016": "*",
+    "babel-preset-es2017": "*",
+    "babel-preset-flow": "*",
+    "babel-preset-stage-0": "*",
+    "babel-preset-stage-2": "*",
+    "babel-register": "^6.26.0",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "~4.16.0",
+    "http-errors": "~1.6.2",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.0",
+    "okrand": "^1.0.1"
+  }
+}

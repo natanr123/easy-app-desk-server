@@ -1,0 +1,25 @@
+# Don't check auto-generated stuff into git
+coverage
+build
+node_modules
+stats.json
+
+# Cruft
+.DS_Store
+npm-debug.log
+.idea
+
+# Logs
+yarn-error.log
+
+# exclude everything
+user_uploads/*
+
+# exception to the rule
+!user_uploads/.gitkeep
+
+# exclude everything
+temp/*
+
+# exception to the rule
+!temp/.gitkeep
