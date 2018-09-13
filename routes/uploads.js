@@ -1,9 +1,14 @@
 import express from 'express';
-var router = express.Router();
-import add from './aaaaa';
-/* GET home page. */
+const router = express.Router();
+
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.send('list');
 });
+
+router.post('/:photoType', function(req, res, next) {
+  const photoType = req.params.photoType;
+  res.send('list: ' + photoType);
+});
+
 
 module.exports = router;
