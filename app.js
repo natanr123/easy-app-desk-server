@@ -19,6 +19,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+const userUploadsFolder = 'user_uploads';
+app.use(`/${userUploadsFolder}`, express.static(`${userUploadsFolder}`));
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
