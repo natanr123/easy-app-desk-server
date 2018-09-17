@@ -21,8 +21,7 @@ router.get('/', function(req, res, next) {
 });
 
 
-// Convert To Min length for any side: 320px. Max length for any side: 3840px. Max aspect ratio: 2:1.:
-const screenshoot = (res, path, outputPath, outputFilename, photoType) => {
+const saveScreenShootToLocal = (path, outputPath, outputFilename, photoType) => {
   console.log('screenshoot: ', path);
   const image = sharp(`./${path}`);
   const response = (data)=> {
@@ -30,49 +29,96 @@ const screenshoot = (res, path, outputPath, outputFilename, photoType) => {
     const output = { path: `/${userUploadsFolder}/${outputFilename}`, photoType };
     res.send(output);
   };
-  image.metadata()
+  return image.metadata()
     .then((metadata) => {
       console.log('metadata: ', metadata);
       const width = metadata.width;
       const height = metadata.height;
+
       if (width<=height){
         if(width < 320) {
           console.log('width lower than 320');
-          image.resize(320,null).png().toFile(outputPath)
-            .then(response);
+          return image.resize(320,null).png().toFile(outputPath)
         } else {
           console.log('height higher than 320');
-          image.png().toFile(outputPath)
-            .then(response);
+          return image.png().toFile(outputPath)
         }
       } else {
 
         if(height < 320) {
-          console.log('width lower than 320');
-          image.resize(null,320).png().toFile(outputPath)
-            .then(response);
+          console.log('height lower than 320');
+          return image.resize(null,320).png().toFile(outputPath)
 
         } else {
           console.log('height higher than 320');
-          image.png().toFile(outputPath)
-            .then(response);
+          return image.png().toFile(outputPath);
         }
       }
+    });
+
+};
+
+// Convert To Min length for any side: 320px. Max length for any side: 3840px. Max aspect ratio: 2:1.:
+const screenshoot = (res, path, outputPath, outputFilename, photoType) => {
+  const conertedImageFile = saveScreenShootToLocal(path, outputPath, outputFilename, photoType);
+  console.log('conertedImageFileconertedImageFileconertedImageFile: ', conertedImageFile);
+  conertedImageFile.then((data) => {
+      return uploadFileToS3(outputPath, outputFilename);
     })
+    .then((s3Response) => {
+      console.log('dddddddddddD:', s3Response);
+      res.send({ path: s3Response.Location, photoType });
+    });
 };
 
 const high_res = (res, path, outputPath, outputFilename, photoType) => {
-  sharp(`./${path}`)
+  const output = { path: `/${userUploadsFolder}/${outputFilename}`, photoType };
+  const conertedImageFile = sharp(`./${path}`)
     .resize(512,512)
     .ignoreAspectRatio()
     .png()
-    .toFile(outputPath)
-    .then((data) => {
-      console.log('converted image', data);
-      const output = { path: `/${userUploadsFolder}/${outputFilename}`, photoType };
-      res.send(output);
+    .toFile(outputPath);
+
+
+  conertedImageFile
+    .then(()=>{
+      return uploadFileToS3(outputPath, outputFilename);
+    })
+    .then((s3Response) => {
+      console.log('dddddddddddD:', s3Response);
+      res.send({ path: s3Response.Location, photoType });
+  });
+};
+
+const uploadFileToS3 = (localFilePath, s3FileName) => {
+  const image = sharp(localFilePath);
+  return image.toBuffer()
+    .then((buffer) => {
+      console.log('buffer: ',buffer);
+      return uploadBufferToS3(buffer, s3FileName);
     });
 };
+
+const uploadBufferToS3 = (buffer, s3FileName) => {
+  const S3_BUCKET = process.env.S3_BUCKET;
+  const AWS_REGION = process.env.AWS_REGION;
+  const s3 = new aws.S3({apiVersion: '2006-03-01', region: AWS_REGION});
+
+  const params = {
+    Bucket: S3_BUCKET,
+    Key: s3FileName,
+    Body: buffer
+  };
+  const putObjectPromise = s3.upload(params).promise();
+  return putObjectPromise.then(function(data) {
+    console.log('Success: ', data);
+    return data;
+  });
+
+
+};
+
+
 
 router.post('/:photoType', upload.single('file') , (req, res, next)=> {
   const photoType = req.params.photoType; const file = req.file;
@@ -97,7 +143,6 @@ const s3 = (req, res, next) => {
   const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
   const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
   const AWS_REGION = process.env.AWS_REGION;
-  aws.config.region = AWS_REGION;
 
   console.log('aws keys: ', S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION);
 
@@ -114,18 +159,6 @@ const s3 = (req, res, next) => {
     console.log('Success: ', data);
     res.send('45454545');
   });
-
-    // const fileName = req.query['file-name'];
-    // const fileType = req.query['file-type'];
-    // const s3Params = {
-    //   Bucket: S3_BUCKET,
-    //   Key: fileName,
-    //   Expires: 60,
-    //   ContentType: fileType,
-    //   ACL: 'public-read'
-    // };
-
-
 };
 
 router.get('/s3', s3);
