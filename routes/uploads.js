@@ -59,7 +59,7 @@ const saveScreenShootToLocal = (path, outputPath, outputFilename, photoType) => 
 };
 
 // Convert To Min length for any side: 320px. Max length for any side: 3840px. Max aspect ratio: 2:1.:
-const screenshoot = (res, path, outputPath, outputFilename, photoType) => {
+const screenshoot = (res, path, outputPath, outputFilename, photoType) => {https://www.facebook.com/lori.mon.3
   const conertedImageFile = saveScreenShootToLocal(path, outputPath, outputFilename, photoType);
   console.log('conertedImageFileconertedImageFileconertedImageFile: ', conertedImageFile);
   conertedImageFile.then((data) => {
