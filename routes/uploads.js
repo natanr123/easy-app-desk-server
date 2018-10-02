@@ -85,10 +85,28 @@ const high_res = (res, path, outputPath, outputFilename, photoType) => {
       return uploadFileToS3(outputPath, outputFilename);
     })
     .then((s3Response) => {
-      console.log('dddddddddddD:', s3Response);
       res.send({ path: s3Response.Location, photoType });
   });
 };
+
+const feature_graphic = (res, path, outputPath, outputFilename, photoType) => {
+  const output = { path: `/${userUploadsFolder}/${outputFilename}`, photoType };
+  const conertedImageFile = sharp(`./${path}`)
+    .resize(1024,500)
+    .ignoreAspectRatio()
+    .png()
+    .toFile(outputPath);
+
+
+  conertedImageFile
+    .then(()=>{
+      return uploadFileToS3(outputPath, outputFilename);
+    })
+    .then((s3Response) => {
+      res.send({ path: s3Response.Location, photoType });
+    });
+};
+
 
 const uploadFileToS3 = (localFilePath, s3FileName) => {
   const image = sharp(localFilePath);
@@ -131,6 +149,8 @@ router.post('/:photoType', upload.single('file') , (req, res, next)=> {
     screenshoot(res, path, outputPath, outputFilename, photoType);
   } else if (photoType === 'icon_high_res') {
     high_res(res, path, outputPath, outputFilename, photoType);
+  } else if (photoType === 'feature_graphic') {
+    feature_graphic(res, path, outputPath, outputFilename, photoType);
   } else {
     throw `photo type not found: ${photoType}`;
   }
