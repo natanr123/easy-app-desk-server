@@ -17,7 +17,7 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
-
+# Also possible to expose 8080 and set the port in the beanstalk env params
 EXPOSE 3000
 
 CMD [ "npm", "start" ]

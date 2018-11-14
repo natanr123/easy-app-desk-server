@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nodemon --watch ./routes ./bin/www",
     "docker_build": "docker build -t easy-app-desc-server .",
-    "docker_run": "docker run -i --rm -p 3000:3000  -e S3_BUCKET=$S3_BUCKET -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_REGION=$AWS_REGION --name easy-app-desc-server easy-app-desc-server",
+    "docker_run": "docker run -i --rm -p 8080:3000  -e S3_BUCKET=$S3_BUCKET -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_REGION=$AWS_REGION --name easy-app-desc-server easy-app-desc-server",
     "docker_stop_container": "docker stop $(docker ps -a -q)",
     "docker_remove_container": "docker rm $(docker ps -a -q)",
     "docker_remove_images": "docker rmi $(docker images -q)"
