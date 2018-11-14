@@ -3,7 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon --watch ./routes ./bin/www"
+    "start": "nodemon --watch ./routes ./bin/www",
+    "docker_build": "docker build -t easy-app-desc .",
+    "docker_run": "docker run -i --rm -p 8080:3000 --name easy-app-desc  easy-app-desc",
+    "docker_stop_container": "docker stop $(docker ps -a -q)",
+    "docker_remove_container": "docker rm $(docker ps -a -q)",
+    "docker_remove_images": "docker rmi $(docker images -q)"
   },
   "dependencies": {
     "aws-sdk": "^2.315.0",
