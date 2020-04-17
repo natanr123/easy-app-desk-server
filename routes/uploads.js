@@ -24,6 +24,11 @@ router.get('/', function(req, res, next) {
   res.send('list');
 });
 
+router.get('/:app_id', function(req, res, next) {
+  res.send('list');
+});
+
+
 router.post('/:photoType', upload.single('file') , (req, res, next)=> {
   const photoType = req.params.photoType; const file = req.file;
   const path = file.path;
