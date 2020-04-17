@@ -10,6 +10,13 @@ import App from '../models/App'
 
 const router = express.Router();
 
+const findApp = (req, res, next) => {
+  App.findOne({name: 'Bear Run'}).then((app)=>{
+    res.locals.app = app;
+    next();
+  })
+}
+
 const storage = multer.diskStorage({
   destination: './temp',
   filename(req, file, cb) {
@@ -21,15 +28,19 @@ const userUploadsFolder = 'user_uploads';
 
 
 router.get('/', function(req, res, next) {
+
   res.send('list');
 });
 
-router.get('/:app_id', function(req, res, next) {
-  res.send('list');
+router.use(findApp).get('/:app_id', function(req, res, next) {
+  const app = res.locals.app;
+  console.log('appappappapp: ', app);
+
+  res.send(app);
 });
 
 
-router.post('/:photoType', upload.single('file') , (req, res, next)=> {
+router.use(findApp).post('/:photoType', upload.single('file') , (req, res, next)=> {
   const photoType = req.params.photoType; const file = req.file;
   const path = file.path;
   const filename = file.filename;
@@ -37,31 +48,30 @@ router.post('/:photoType', upload.single('file') , (req, res, next)=> {
   const outputFilename = `${photoType}_${filename}`;
   const outputPath = `./${userUploadsFolder}/${outputFilename}`;
 
-  App.findOne({name: 'Bear Run'}).then((app)=>{
-    console.log('appappappappappapp: ', app);
-    if (app === null) {
-      app = new App({name: 'Bear Run'})
-    }
-    switch(photoType) {
-      case 'screenshoot':
-        screenshoot(res, path, outputPath, outputFilename, photoType);
-        break;
-      case 'icon_high_res':
-        high_res(res, path, outputPath, outputFilename, photoType);
-        break;
-      case 'feature_graphic':
-        feature_graphic(res, path, outputPath, outputFilename, photoType);
-        break;
-      case 'icon48x48':
-        const result= icon(app, path, outputPath, outputFilename, photoType, 48, 48);
-        result.then((obj)=>{
-          res.send(obj)
-        })
-        break;
-      default:
-        throw `photo type not found: ${photoType}`;
-    }
-  })
+  let app = res.locals.app;
+  console.log('appappappappappapp: ', app);
+  if (app === null) {
+    app = new App({name: 'Bear Run'})
+  }
+  switch(photoType) {
+    case 'screenshoot':
+      screenshoot(res, path, outputPath, outputFilename, photoType);
+      break;
+    case 'icon_high_res':
+      high_res(res, path, outputPath, outputFilename, photoType);
+      break;
+    case 'feature_graphic':
+      feature_graphic(res, path, outputPath, outputFilename, photoType);
+      break;
+    case 'icon48x48':
+      const result= icon(app, path, outputPath, outputFilename, photoType, 48, 48);
+      result.then((obj)=>{
+        res.send(obj)
+      })
+      break;
+    default:
+      throw `photo type not found: ${photoType}`;
+  }
 
 
 });
