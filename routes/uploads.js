@@ -22,7 +22,34 @@ router.get('/', function(req, res, next) {
   res.send('list');
 });
 
+router.post('/:photoType', upload.single('file') , (req, res, next)=> {
+  const photoType = req.params.photoType; const file = req.file;
+  const path = file.path;
+  const filename = file.filename;
+  console.log(`received file: ${filename}`);
+  const outputFilename = `${photoType}_${filename}`;
+  const outputPath = `./${userUploadsFolder}/${outputFilename}`;
 
+  let result;
+
+  switch(photoType) {
+    case 'screenshoot':
+      screenshoot(res, path, outputPath, outputFilename, photoType);
+      break;
+    case 'icon_high_res':
+      high_res(res, path, outputPath, outputFilename, photoType);
+      break;
+    case 'feature_graphic':
+      feature_graphic(res, path, outputPath, outputFilename, photoType);
+      break;
+    case 'icon48x48':
+      result = icon(res, path, outputPath, outputFilename, photoType, 48, 48);
+      res.send(result);
+      break;
+    default:
+      throw `photo type not found: ${photoType}`;
+  }
+});
 
 
 // Convert To Min length for any side: 320px. Max length for any side: 3840px. Max aspect ratio: 2:1.:
@@ -34,21 +61,17 @@ const screenshoot = (res, path, outputPath, outputFilename, photoType) => {
       return MyS3.uploadFileToS3(outputPath, outputFilename);
     })
     .then((s3Response) => {
-      console.log('dddddddddddD:', s3Response);
       res.send({ path: s3Response.Location, photoType });
     });
 };
 
 const high_res = (res, path, outputPath, outputFilename, photoType) => {
   const output = { path: `/${userUploadsFolder}/${outputFilename}`, photoType };
-  const conertedImageFile = sharp(`./${path}`)
-    .resize(512,512)
-    .ignoreAspectRatio()
-    .png()
-    .toFile(outputPath);
+
+  const convertedImageFile = MyImage.highRes(path, outputPath)
 
 
-  conertedImageFile
+  convertedImageFile
     .then(()=>{
       return uploadFileToS3(outputPath, outputFilename);
     })
@@ -58,47 +81,29 @@ const high_res = (res, path, outputPath, outputFilename, photoType) => {
 };
 
 const feature_graphic = (res, path, outputPath, outputFilename, photoType) => {
-  const output = { path: `/${userUploadsFolder}/${outputFilename}`, photoType };
-  const conertedImageFile = sharp(`./${path}`)
-    .resize(1024,500)
-    .ignoreAspectRatio()
-    .png()
-    .toFile(outputPath);
 
+  const convertedImageFile = MyImage.resize(path, outputPath, 1024, 500)
 
-  conertedImageFile
+  convertedImageFile
     .then(()=>{
-      return uploadFileToS3(outputPath, outputFilename);
+      return MyS3.uploadFileToS3(outputPath, outputFilename);
     })
     .then((s3Response) => {
       res.send({ path: s3Response.Location, photoType });
     });
 };
 
+const icon = (res, path, outputPath, outputFilename, photoType, width, height) => {
+  const convertedImageFile = MyImage.resize(path, outputPath, width, height)
+  return convertedImageFile
+      .then(()=>{
+        return MyS3.uploadFileToS3(outputPath, outputFilename);
+      })
+      .then((s3Response) => {
+        return { path: s3Response.Location, photoType };
+      });
+};
 
-
-
-
-
-
-router.post('/:photoType', upload.single('file') , (req, res, next)=> {
-  const photoType = req.params.photoType; const file = req.file;
-  const path = file.path;
-  const filename = file.filename;
-  console.log(`received file: ${filename}`);
-  const outputFilename = `${photoType}_${filename}`;
-  const outputPath = `./${userUploadsFolder}/${outputFilename}`;
-  if (photoType === 'screenshoot') {
-    screenshoot(res, path, outputPath, outputFilename, photoType);
-  } else if (photoType === 'icon_high_res') {
-    high_res(res, path, outputPath, outputFilename, photoType);
-  } else if (photoType === 'feature_graphic') {
-    feature_graphic(res, path, outputPath, outputFilename, photoType);
-  } else {
-    throw `photo type not found: ${photoType}`;
-  }
-
-});
 
 const s3 = (req, res, next) => {
 
