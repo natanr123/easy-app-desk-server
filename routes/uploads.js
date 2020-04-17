@@ -4,6 +4,7 @@ import sharp from 'sharp';
 import AWS from 'aws-sdk';
 import MyImage from "../lib/MyImage";
 import MyS3 from "../lib/MyS3";
+import Upload from '../models/Upload'
 
 
 const router = express.Router();
@@ -43,8 +44,10 @@ router.post('/:photoType', upload.single('file') , (req, res, next)=> {
       feature_graphic(res, path, outputPath, outputFilename, photoType);
       break;
     case 'icon48x48':
-      result = icon(res, path, outputPath, outputFilename, photoType, 48, 48);
-      res.send(result);
+      const result= icon(path, outputPath, outputFilename, photoType, 48, 48);
+      result.then((obj)=>{
+        res.send(obj)
+      })
       break;
     default:
       throw `photo type not found: ${photoType}`;
@@ -93,14 +96,19 @@ const feature_graphic = (res, path, outputPath, outputFilename, photoType) => {
     });
 };
 
-const icon = (res, path, outputPath, outputFilename, photoType, width, height) => {
-  const convertedImageFile = MyImage.resize(path, outputPath, width, height)
+const icon = (path, outputPath, outputFilename, photoType, width, height) => {
+  const convertedImageFile = MyImage.resize(path, outputPath, width, height);
+
   return convertedImageFile
       .then(()=>{
         return MyS3.uploadFileToS3(outputPath, outputFilename);
       })
       .then((s3Response) => {
         return { path: s3Response.Location, photoType };
+      }).then((result)=>{
+        const upload = new Upload({name: `icon${width}x${height}`, url: result.path} );
+        console.log('uploaduploaduploaduploadupload: ', upload);
+        return upload;
       });
 };
 

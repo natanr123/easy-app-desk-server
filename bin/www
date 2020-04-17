@@ -7,6 +7,29 @@
 
 require('./../babelhooks');
 require('./hello');
+const path = require('path')
+
+require('dotenv').config({path: path.resolve(process.cwd(), 'development.env')});
+
+
+console.log('process.env.DB_NAME: ', process.env.DB_NAME);
+
+var mongoose = require('mongoose');
+
+const dbName = process.env.DB_NAME;
+const dbUsername = process.env.DB_USERNAME;
+const dbPassword = process.env.DB_PASSWORD;
+const dbHost = process.env.DB_HOST;
+
+// var mongoDB = `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/${dbName}?retryWrites=true`;
+var mongoDB = `mongodb://${dbHost}/${dbName}`;
+console.log('mongoDB: ', mongoDB);
+mongoose.connect(mongoDB, { useNewUrlParser: true,
+  useUnifiedTopology: true});
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 var app = require('../app');
 var debug = require('debug')('easy-app-desc-server:server');
