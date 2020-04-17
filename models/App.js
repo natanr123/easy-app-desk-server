@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema(
     {
+        name: String,
         icon48x48: String,
         createdAt: { type: Date, default: Date.now },
     });

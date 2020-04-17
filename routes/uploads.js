@@ -5,6 +5,7 @@ import AWS from 'aws-sdk';
 import MyImage from "../lib/MyImage";
 import MyS3 from "../lib/MyS3";
 import Upload from '../models/Upload'
+import App from '../models/App'
 
 
 const router = express.Router();
@@ -31,27 +32,33 @@ router.post('/:photoType', upload.single('file') , (req, res, next)=> {
   const outputFilename = `${photoType}_${filename}`;
   const outputPath = `./${userUploadsFolder}/${outputFilename}`;
 
-  let result;
+  App.findOne({name: 'Bear Run'}).then((app)=>{
+    console.log('appappappappappapp: ', app);
+    if (app === null) {
+      app = new App({name: 'Bear Run'})
+    }
+    switch(photoType) {
+      case 'screenshoot':
+        screenshoot(res, path, outputPath, outputFilename, photoType);
+        break;
+      case 'icon_high_res':
+        high_res(res, path, outputPath, outputFilename, photoType);
+        break;
+      case 'feature_graphic':
+        feature_graphic(res, path, outputPath, outputFilename, photoType);
+        break;
+      case 'icon48x48':
+        const result= icon(app, path, outputPath, outputFilename, photoType, 48, 48);
+        result.then((obj)=>{
+          res.send(obj)
+        })
+        break;
+      default:
+        throw `photo type not found: ${photoType}`;
+    }
+  })
 
-  switch(photoType) {
-    case 'screenshoot':
-      screenshoot(res, path, outputPath, outputFilename, photoType);
-      break;
-    case 'icon_high_res':
-      high_res(res, path, outputPath, outputFilename, photoType);
-      break;
-    case 'feature_graphic':
-      feature_graphic(res, path, outputPath, outputFilename, photoType);
-      break;
-    case 'icon48x48':
-      const result= icon(path, outputPath, outputFilename, photoType, 48, 48);
-      result.then((obj)=>{
-        res.send(obj)
-      })
-      break;
-    default:
-      throw `photo type not found: ${photoType}`;
-  }
+
 });
 
 
@@ -96,7 +103,7 @@ const feature_graphic = (res, path, outputPath, outputFilename, photoType) => {
     });
 };
 
-const icon = (path, outputPath, outputFilename, photoType, width, height) => {
+const icon = (app, path, outputPath, outputFilename, photoType, width, height) => {
   const convertedImageFile = MyImage.resize(path, outputPath, width, height);
 
   return convertedImageFile
@@ -106,9 +113,10 @@ const icon = (path, outputPath, outputFilename, photoType, width, height) => {
       .then((s3Response) => {
         return { path: s3Response.Location, photoType };
       }).then((result)=>{
-        const upload = new Upload({name: `icon${width}x${height}`, url: result.path} );
-        console.log('uploaduploaduploaduploadupload: ', upload);
-        return upload;
+        // const upload = new Upload({name: `icon${width}x${height}`, url: result.path} );
+        app[`icon${width}x${height}`] = result.path;
+        console.log('uploaduploaduploaduploadupload: ', app);
+        return app.save();
       });
 };
 
