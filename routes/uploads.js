@@ -64,8 +64,8 @@ router.use(findApp).post('/:photoType', upload.single('file') , (req, res, next)
     case 'icon512x512':
       result = icon(app, path, outputPath, outputFilename, photoType, 512, 512);
       break;
-    case 'feature_graphic':
-      feature_graphic(res, path, outputPath, outputFilename, photoType);
+    case 'feature1024x500':
+      result = icon(app, path, outputPath, outputFilename, photoType, 1024, 500);
       break;
     case 'icon48x48':
       result = icon(app, path, outputPath, outputFilename, photoType, 48, 48);
@@ -140,7 +140,7 @@ const icon = (app, path, outputPath, outputFilename, photoType, width, height) =
         return { path: s3Response.Location, photoType };
       }).then((result)=>{
         // const upload = new Upload({name: `icon${width}x${height}`, url: result.path} );
-        app[`icon${width}x${height}`] = result.path;
+        app[photoType] = result.path;
         console.log('uploaduploaduploaduploadupload: ', app);
         return app.save();
       });

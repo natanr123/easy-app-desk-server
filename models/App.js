@@ -12,6 +12,7 @@ const schema = new Schema(
         icon512x512: String,
         screenshot1: String,
         screenshot2: String,
+        feature1024x500: String,
         createdAt: { type: Date, default: Date.now },
     });
 
