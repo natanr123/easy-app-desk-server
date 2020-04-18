@@ -58,6 +58,9 @@ router.use(findApp).post('/:photoType', upload.single('file') , (req, res, next)
     case 'screenshot1':
       result = screenshot(app, path, outputPath, outputFilename, photoType, 1);
       break;
+    case 'screenshot2':
+      result = screenshot(app, path, outputPath, outputFilename, photoType, 2);
+      break;
     case 'icon512x512':
       result = icon(app, path, outputPath, outputFilename, photoType, 512, 512);
       break;
