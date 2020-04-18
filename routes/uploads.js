@@ -53,6 +53,7 @@ router.use(findApp).post('/:photoType', upload.single('file') , (req, res, next)
   if (app === null) {
     app = new App({name: 'Bear Run'})
   }
+  let result = null;
   switch(photoType) {
     case 'screenshoot':
       screenshoot(res, path, outputPath, outputFilename, photoType);
@@ -64,13 +65,26 @@ router.use(findApp).post('/:photoType', upload.single('file') , (req, res, next)
       feature_graphic(res, path, outputPath, outputFilename, photoType);
       break;
     case 'icon48x48':
-      const result= icon(app, path, outputPath, outputFilename, photoType, 48, 48);
-      result.then((obj)=>{
-        res.send(obj)
-      })
+      result = icon(app, path, outputPath, outputFilename, photoType, 48, 48);
+      break;
+    case 'icon36x36':
+      result = icon(app, path, outputPath, outputFilename, photoType, 36, 36);
+      break;
+    case 'icon72x72':
+      result = icon(app, path, outputPath, outputFilename, photoType, 72, 72);
+      break;
+    case 'icon96x96':
+      result = icon(app, path, outputPath, outputFilename, photoType, 96, 96);
       break;
     default:
-      throw `photo type not found: ${photoType}`;
+      console.log(`photo type not found: ${photoType}`)
+      throw new Error(`photo type not found: ${photoType}`);
+  }
+
+  if (result !== null) {
+    result.then((obj)=>{
+      res.send(obj);
+    })
   }
 
 
@@ -135,32 +149,6 @@ const icon = (app, path, outputPath, outputFilename, photoType, width, height) =
       });
 };
 
-
-const s3 = (req, res, next) => {
-
-  const S3_BUCKET = process.env.S3_BUCKET;
-  const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
-  const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
-  const AWS_REGION = process.env.AWS_REGION;
-
-  console.log('aws keys: ', S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION);
-
-
-
-  const s3 = new AWS.S3({apiVersion: '2006-03-01', region: AWS_REGION});
-  var params = {
-    Bucket: S3_BUCKET,
-    Key: 'example2.txt',
-    Body: 'Uploaded text using the promise-based method!'
-  };
-  var putObjectPromise = s3.putObject(params).promise();
-  putObjectPromise.then(function(data) {
-    console.log('Success: ', data);
-    res.send('45454545');
-  });
-};
-
-router.get('/s3', s3);
 
 
 module.exports = router;

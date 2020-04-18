@@ -6,6 +6,9 @@ const schema = new Schema(
     {
         name: String,
         icon48x48: String,
+        icon36x36: String,
+        icon72x72: String,
+        icon96x96: String,
         createdAt: { type: Date, default: Date.now },
     });
 
