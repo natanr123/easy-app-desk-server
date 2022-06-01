@@ -37,6 +37,6 @@
     "multer": "^1.3.1",
     "nodemon": "^1.18.3",
     "okrand": "^1.0.1",
-    "sharp": "^0.25.2 --unsafe-perm"
+    "sharp": "^0.30.5 --unsafe-perm"
   }
 }
